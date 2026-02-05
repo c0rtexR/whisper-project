@@ -38,10 +38,14 @@ Transform your transcriptions with 4 different writing styles:
 - ~2GB disk space for Whisper models
 - Additional 5-10GB for LLM models (optional)
 
-### Download
-1. Download the latest release from [Releases](../../releases)
-2. Move `WhisperDictation.app` to `/Applications/`
-3. Open the app
+### Download & Install
+1. Download the latest `WhisperDictation-v1.0.zip` from [Releases](../../releases)
+2. Unzip and move `WhisperDictation.app` to `/Applications/`
+3. **Important**: Right-click the app and select "Open" (first launch only)
+   - You'll see an "unidentified developer" warning
+   - Click "Open" to confirm
+   - This is because the app is not notarized (no $99/year Apple Developer account)
+   - After the first launch, you can open it normally
 4. Grant **Microphone** and **Accessibility** permissions when prompted
 
 ### First Launch Setup
@@ -161,3 +165,35 @@ Downloaded through the app UI:
 ## License
 
 MIT License - see LICENSE file for details
+
+## Security & Privacy
+
+### Code Signing
+This app is **self-signed** (not notarized by Apple). This means:
+- ❌ You'll see an "unidentified developer" warning on first launch
+- ✅ The code is **100% open source** - you can inspect every line
+- ✅ All processing happens **locally on your Mac**
+- ✅ No data is sent to external servers
+- ✅ You can build from source to verify
+
+### Why Not Notarized?
+Apple notarization requires a $99/year Developer ID. For an open-source project, we prioritize:
+1. **Transparency**: Full source code available
+2. **Privacy**: Everything runs locally
+3. **Community**: Anyone can contribute and verify
+
+If you're concerned, you can:
+- Build from source (see "Building from Source" section)
+- Inspect the code before installing
+- Check file hashes in GitHub releases
+
+### Alternative Installation (Advanced)
+If you prefer, you can bypass Gatekeeper entirely:
+```bash
+# Remove quarantine attribute
+xattr -d com.apple.quarantine /Applications/WhisperDictation.app
+
+# Or disable Gatekeeper temporarily (not recommended)
+sudo spctl --master-disable
+```
+
