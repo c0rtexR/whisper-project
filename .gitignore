@@ -45,3 +45,5 @@ Package.resolved
 # llama.cpp build artifacts
 llama.cpp/build/
 llama.cpp/.git/
+llama.cpp/
+whisper.cpp/whisper.cpp/

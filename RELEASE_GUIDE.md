@@ -56,11 +56,29 @@ Transform your voice dictations with 4 different writing styles!
 - 8GB+ RAM recommended for Writing Styles (7B model)
 
 ### 📥 Installation
-1. Download `WhisperDictation-v1.0.zip`
+
+**Manual Install:**
+1. Download `WhisperDictation-v1.0.0.zip`
 2. Unzip and move to `/Applications/`
 3. Right-click → Open (first launch only)
 4. Grant Microphone and Accessibility permissions
 5. Download models through Settings
+
+**Auto-Update:**
+- Existing users will be notified automatically
+- Click "Download & Install" in the update prompt
+- Or check manually: Menu Bar → Check for Updates...
+
+### 🔒 Integrity Verification
+**SHA256 Checksum:**
+```
+[paste checksum here]
+```
+
+Verify manually:
+```bash
+shasum -a 256 WhisperDictation-v1.0.0.zip
+```
 
 ### 🎨 Using Writing Styles
 1. Settings → General → Enable "Use LLM to correct transcriptions"
@@ -77,13 +95,33 @@ Transform your voice dictations with 4 different writing styles!
 Built with whisper.cpp, llama.cpp, and Qwen models.
 ```
 
-4. **Upload**:
-   - Drag and drop `~/Desktop/WhisperDictation-v1.0.zip`
-   - Add SHA256 checksum to release notes:
+4. **Generate SHA256 Checksum**:
+
+The auto-updater verifies downloads using SHA256 checksums. Generate and include in release notes:
+
+```bash
+# Navigate to where you saved the zip file
+cd ~/Desktop
+
+# Generate checksum
+shasum -a 256 WhisperDictation-v1.0.0.zip
+
+# Output example:
+# abc123def456789... WhisperDictation-v1.0.0.zip
+```
+
+5. **Upload**:
+   - Drag and drop `~/Desktop/WhisperDictation-v1.0.0.zip`
+   - Add SHA256 checksum to release notes in this format:
      ```
-     SHA256: b013a4d1a07663580db046036b9289623d0a230990485b3f9a9d4a2aad549792
+     **SHA256 Checksum:**
      ```
-5. Click "Publish release"
+     abc123def456789...
+     ```
+     ```
+   - This checksum is used by the auto-updater to verify download integrity
+
+6. Click "Publish release"
 
 ## 4. Add Release Badge to README
 

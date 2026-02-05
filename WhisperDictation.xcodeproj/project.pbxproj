@@ -12,12 +12,16 @@
 		207906FC1E8AA06371037066 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F68716E33479CCCA6BF80B4E /* ServiceManagement.framework */; };
 		20C78B5EFE95315F3C91071F /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50579EA796CA0E18C0A12EA2 /* Metal.framework */; };
 		234654E0D23DDE32FA66832C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A458A78F11564EE12A2B0DE /* AppDelegate.swift */; };
+		2863D0A89C2EE1CBAE0445AE /* GitHubRelease.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7EBECE1BC0D23A2A6DE3C3A /* GitHubRelease.swift */; };
+		2A7966FE84EE99F9AA34743F /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94860489F72B75BF9BD57F24 /* UpdateChecker.swift */; };
 		2AF75EB3369AA0D204492082 /* FirstLaunchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF03062F7B57E45D191E367F /* FirstLaunchView.swift */; };
+		2FF6CED69F45F73D5B09CEB8 /* UpdateDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8EB78789F312FFF3A8289A /* UpdateDownloadView.swift */; };
 		32EB00EE7A00F889BEF5BED1 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1F8FE26EA713FBD5668B89 /* AudioRecorder.swift */; };
 		48A9B6ED764EFC993EA76905 /* WhisperDictationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A61851EC37618181A280796 /* WhisperDictationApp.swift */; };
 		59F2893C530CDB3B19B29CCC /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D8573EA0B8CBFFF49D49AE /* AppSettings.swift */; };
 		665D1A5EFF30D50202D5BAC9 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D74E444E3177A6E30D241847 /* Carbon.framework */; };
 		69BEE448BA46D81C3F30E5C7 /* TextInjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47FF2EAD75FCD861C02193EE /* TextInjector.swift */; };
+		6A05584F5D3D8AA4C8EF75E9 /* AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B02084D5CDBFAE5CE35B6A /* AppVersion.swift */; };
 		7E5A40FD98A0644B50AA8F5A /* libmtmd.0.dylib in Resources */ = {isa = PBXBuildFile; fileRef = 539F25A641F975895DA7098F /* libmtmd.0.dylib */; };
 		80B609F7273342ED2535898F /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9684413F50180B7E8C27AF /* HotkeyManager.swift */; };
 		8750C57723EB5DD57855E226 /* WhisperModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3D3824E6897B739F5636C4 /* WhisperModel.swift */; };
@@ -30,6 +34,8 @@
 		B2D1BA31EF866063DDFB2734 /* libllama.0.dylib in Resources */ = {isa = PBXBuildFile; fileRef = 00EC463C12D9A1A2059EDB3D /* libllama.0.dylib */; };
 		C6612C445B3C07AACB5B781F /* LlamaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98ADBD8AFC7E8E77B49671AA /* LlamaService.swift */; };
 		E04662F4423B89844B31DC4B /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0185383D70CC1B41D01CEE /* ModelDownloader.swift */; };
+		E57C2CB169C19092C4829652 /* UpdatePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A905F730E8A51CB6E9EB1CD /* UpdatePromptView.swift */; };
+		F456A8D4B7D021805159AB8E /* UpdateReadyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86E4C41959C66FB09825AE77 /* UpdateReadyView.swift */; };
 		F810CCF01FCDBB91BB3C0E4F /* TranscriptionHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC59166F9D00161FCD7A27B4 /* TranscriptionHistory.swift */; };
 		FC683CD2F1727E718B43C45E /* TranscriptionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D003FB6D0565B7D8B82074D /* TranscriptionState.swift */; };
 /* End PBXBuildFile section */
@@ -51,16 +57,22 @@
 		5A458A78F11564EE12A2B0DE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65926DA67CFF52E6F32FB153 /* WhisperDictation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WhisperDictation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		76F1192BA69D76D346C510A0 /* WhisperDictation.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WhisperDictation.entitlements; sourceTree = "<group>"; };
+		7A905F730E8A51CB6E9EB1CD /* UpdatePromptView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdatePromptView.swift; sourceTree = "<group>"; };
+		86E4C41959C66FB09825AE77 /* UpdateReadyView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateReadyView.swift; sourceTree = "<group>"; };
 		8F999943E6A6520020BCAA79 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
 		906FBE4761E4D60F1A83701E /* llama-server */ = {isa = PBXFileReference; path = "llama-server"; sourceTree = "<group>"; };
+		94860489F72B75BF9BD57F24 /* UpdateChecker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		98ADBD8AFC7E8E77B49671AA /* LlamaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaService.swift; sourceTree = "<group>"; };
 		AA727A5E36FF1C399430DD4F /* LLMModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMModel.swift; sourceTree = "<group>"; };
 		AB9684413F50180B7E8C27AF /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
+		B7EBECE1BC0D23A2A6DE3C3A /* GitHubRelease.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GitHubRelease.swift; sourceTree = "<group>"; };
 		BA1F8FE26EA713FBD5668B89 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		BF03062F7B57E45D191E367F /* FirstLaunchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstLaunchView.swift; sourceTree = "<group>"; };
 		C40982F50EE92D2EE9169E2D /* llama-cli */ = {isa = PBXFileReference; path = "llama-cli"; sourceTree = "<group>"; };
+		CA8EB78789F312FFF3A8289A /* UpdateDownloadView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdateDownloadView.swift; sourceTree = "<group>"; };
 		CC59166F9D00161FCD7A27B4 /* TranscriptionHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionHistory.swift; sourceTree = "<group>"; };
 		D74E444E3177A6E30D241847 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		D8B02084D5CDBFAE5CE35B6A /* AppVersion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppVersion.swift; sourceTree = "<group>"; };
 		DD3D3824E6897B739F5636C4 /* WhisperModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperModel.swift; sourceTree = "<group>"; };
 		E577DF53DA89383F42BA167B /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		E62A1A3AC4D85975F3F410CA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -124,6 +136,7 @@
 				3A0185383D70CC1B41D01CEE /* ModelDownloader.swift */,
 				47FF2EAD75FCD861C02193EE /* TextInjector.swift */,
 				8F999943E6A6520020BCAA79 /* WhisperService.swift */,
+				94860489F72B75BF9BD57F24 /* UpdateChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -162,6 +175,9 @@
 				1478BD72FAC1B59B3868B52C /* HistoryView.swift */,
 				E577DF53DA89383F42BA167B /* MenuBarView.swift */,
 				E62A1A3AC4D85975F3F410CA /* SettingsView.swift */,
+				7A905F730E8A51CB6E9EB1CD /* UpdatePromptView.swift */,
+				CA8EB78789F312FFF3A8289A /* UpdateDownloadView.swift */,
+				86E4C41959C66FB09825AE77 /* UpdateReadyView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -174,6 +190,8 @@
 				CC59166F9D00161FCD7A27B4 /* TranscriptionHistory.swift */,
 				4D003FB6D0565B7D8B82074D /* TranscriptionState.swift */,
 				DD3D3824E6897B739F5636C4 /* WhisperModel.swift */,
+				D8B02084D5CDBFAE5CE35B6A /* AppVersion.swift */,
+				B7EBECE1BC0D23A2A6DE3C3A /* GitHubRelease.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -194,8 +212,6 @@
 			dependencies = (
 			);
 			name = WhisperDictation;
-			packageProductDependencies = (
-			);
 			productName = WhisperDictation;
 			productReference = 65926DA67CFF52E6F32FB153 /* WhisperDictation.app */;
 			productType = "com.apple.product-type.application";
@@ -226,6 +242,7 @@
 			mainGroup = 1EDBA9D61676E8BF85E48DE9;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 05497071BE21782C90C677BF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -268,6 +285,12 @@
 				48A9B6ED764EFC993EA76905 /* WhisperDictationApp.swift in Sources */,
 				8750C57723EB5DD57855E226 /* WhisperModel.swift in Sources */,
 				A2E5C0160AF438F8F33B999E /* WhisperService.swift in Sources */,
+				6A05584F5D3D8AA4C8EF75E9 /* AppVersion.swift in Sources */,
+				2863D0A89C2EE1CBAE0445AE /* GitHubRelease.swift in Sources */,
+				2A7966FE84EE99F9AA34743F /* UpdateChecker.swift in Sources */,
+				E57C2CB169C19092C4829652 /* UpdatePromptView.swift in Sources */,
+				2FF6CED69F45F73D5B09CEB8 /* UpdateDownloadView.swift in Sources */,
+				F456A8D4B7D021805159AB8E /* UpdateReadyView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -355,7 +378,15 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/whisper.cpp/lib/lib";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				OTHER_LDFLAGS = "-lwhisper -lggml -lggml-metal -lggml-blas -lggml-cpu -lggml-base -lc++";
+				OTHER_LDFLAGS = (
+					"-lwhisper",
+					"-lggml",
+					"-lggml-metal",
+					"-lggml-blas",
+					"-lggml-cpu",
+					"-lggml-base",
+					"-lc++",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.whisperdictation.WhisperDictation;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = WhisperDictation/WhisperBridge.h;
@@ -437,7 +468,15 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/whisper.cpp/lib/lib";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				OTHER_LDFLAGS = "-lwhisper -lggml -lggml-metal -lggml-blas -lggml-cpu -lggml-base -lc++";
+				OTHER_LDFLAGS = (
+					"-lwhisper",
+					"-lggml",
+					"-lggml-metal",
+					"-lggml-blas",
+					"-lggml-cpu",
+					"-lggml-base",
+					"-lc++",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.whisperdictation.WhisperDictation;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = WhisperDictation/WhisperBridge.h;

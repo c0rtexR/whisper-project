@@ -47,6 +47,83 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Start hotkey monitoring
             startHotkeyMonitoring()
         }
+
+        // Check for updates if enabled
+        if AppSettings.shared.autoCheckForUpdates {
+            // Delay by 3 seconds to not slow down launch
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                UpdateChecker.shared.checkForUpdates(silent: true)
+            }
+        }
+
+        // Show toast if app was just updated
+        if CommandLine.arguments.contains("--just-updated") {
+            showUpdateToast()
+        }
+    }
+
+    private func showUpdateToast() {
+        let version = AppVersion.current.string
+
+        let hostingView = NSHostingController(rootView:
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.green)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Whisper Dictation Updated")
+                        .font(.headline)
+                    Text("Now running v\(version)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .fixedSize()
+        )
+
+        let contentSize = hostingView.view.fittingSize
+
+        let toast = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: contentSize.width + 40, height: contentSize.height + 28),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        toast.backgroundColor = NSColor.windowBackgroundColor
+        toast.isOpaque = false
+        toast.level = .floating
+        toast.hasShadow = true
+        toast.isMovable = false
+        toast.contentViewController = hostingView
+
+        // Position near top of screen
+        if let screen = NSScreen.main {
+            let screenFrame = screen.visibleFrame
+            toast.setFrameOrigin(NSPoint(
+                x: screenFrame.midX - toast.frame.width / 2,
+                y: screenFrame.maxY - 100
+            ))
+        }
+
+        // Fade in
+        toast.alphaValue = 0
+        toast.orderFront(nil)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.3
+            toast.animator().alphaValue = 1
+        }
+
+        // Fade out after 4 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.5
+                toast.animator().alphaValue = 0
+            }, completionHandler: {
+                toast.close()
+            })
+        }
     }
 
     private func requestPermissions() {
@@ -361,6 +438,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
         menu.addItem(settingsItem)
 
+        // Check for Updates
+        let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        menu.addItem(updateItem)
+
         menu.addItem(NSMenuItem.separator())
 
         // Quit
@@ -408,6 +489,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func openModelManager() {
         openSettings()
+    }
+
+    @objc func checkForUpdates() {
+        UpdateChecker.shared.checkForUpdates(silent: false)
     }
 
     @objc func quit() {

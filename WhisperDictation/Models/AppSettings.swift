@@ -15,6 +15,8 @@ class AppSettings: ObservableObject {
     @AppStorage("useLLMCorrection") var useLLMCorrection: Bool = false
     @AppStorage("llmModel") var llmModel: String = "qwen2.5-0.5b-instruct-q4_0.gguf"
     @AppStorage("writingStyle") var writingStyle: WritingStyle = .none
+    @AppStorage("autoCheckForUpdates") var autoCheckForUpdates: Bool = true
+    @AppStorage("lastUpdateCheckDate") var lastUpdateCheckDate: Double = 0
 
     var modelsDirectory: URL {
         guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {

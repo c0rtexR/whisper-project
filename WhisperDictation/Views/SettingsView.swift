@@ -33,6 +33,11 @@ struct SettingsView: View {
                 .tabItem {
                     Label("About", systemImage: "info.circle")
                 }
+
+            UpdatesSettingsView()
+                .tabItem {
+                    Label("Updates", systemImage: "arrow.down.circle")
+                }
         }
         .frame(width: 500, height: 400)
     }
@@ -425,7 +430,7 @@ struct AboutView: View {
                 .font(.title)
                 .fontWeight(.bold)
 
-            Text("Version 1.0.0")
+            Text("Version \(AppVersion.current.string)")
                 .foregroundColor(.secondary)
 
             Text("System-wide voice dictation powered by OpenAI's Whisper")
@@ -441,6 +446,86 @@ struct AboutView: View {
                 .foregroundColor(.secondary)
         }
         .padding()
+    }
+}
+
+struct UpdatesSettingsView: View {
+    @ObservedObject private var settings = AppSettings.shared
+    @ObservedObject private var updateChecker = UpdateChecker.shared
+    @State private var showUpdatePrompt = false
+
+    var body: some View {
+        Form {
+            Section(header: Text("Automatic Updates")) {
+                Toggle("Automatically check for updates", isOn: $settings.autoCheckForUpdates)
+
+                if settings.lastUpdateCheckDate > 0 {
+                    let date = Date(timeIntervalSince1970: settings.lastUpdateCheckDate)
+                    Text("Last checked: \(date, style: .relative)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Section(header: Text("Current Version")) {
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    Text(AppVersion.current.string)
+                        .foregroundColor(.secondary)
+                }
+
+                if let update = updateChecker.availableUpdate,
+                   let newVersion = update.version {
+                    HStack {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundColor(.blue)
+                        Text("Update available: \(newVersion.string)")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+
+            Section {
+                Button(action: {
+                    updateChecker.availableUpdate = nil
+                    updateChecker.checkForUpdates(silent: false)
+                }) {
+                    HStack {
+                        if updateChecker.isCheckingForUpdates {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                        Text(updateChecker.isCheckingForUpdates ? "Checking..." : "Check for Updates")
+                    }
+                }
+                .disabled(updateChecker.isCheckingForUpdates)
+            }
+
+            if let error = updateChecker.error {
+                Section {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+            }
+        }
+        .padding()
+        .sheet(isPresented: $showUpdatePrompt) {
+            if let update = updateChecker.availableUpdate {
+                UpdatePromptView(release: update, updateChecker: updateChecker)
+            }
+        }
+        .onChange(of: updateChecker.availableUpdate) { newValue in
+            if newValue != nil {
+                showUpdatePrompt = true
+            }
+        }
+        .onAppear {
+            if updateChecker.availableUpdate != nil {
+                showUpdatePrompt = true
+            }
+        }
     }
 }
 
