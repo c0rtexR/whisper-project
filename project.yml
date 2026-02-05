@@ -1,0 +1,44 @@
+name: WhisperDictation
+options:
+  bundleIdPrefix: com.whisperdictation
+  deploymentTarget:
+    macOS: "13.0"
+targets:
+  WhisperDictation:
+    type: application
+    platform: macOS
+    sources:
+      - WhisperDictation
+    info:
+      path: WhisperDictation/Resources/Info.plist
+      properties:
+        LSUIElement: true
+        NSMicrophoneUsageDescription: "Whisper Dictation needs access to your microphone to record audio for transcription."
+        NSAppleEventsUsageDescription: "Whisper Dictation needs permission to send keystrokes to insert transcribed text."
+        NSSystemAdministrationUsageDescription: "Whisper Dictation needs accessibility access to monitor global keyboard shortcuts and insert text."
+    entitlements:
+      path: WhisperDictation/WhisperDictation.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.device.audio-input: true
+        com.apple.security.automation.apple-events: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.whisperdictation.WhisperDictation
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        SWIFT_VERSION: "5.0"
+        HEADER_SEARCH_PATHS: "$(PROJECT_DIR)/whisper.cpp/lib/include"
+        LIBRARY_SEARCH_PATHS: "$(PROJECT_DIR)/whisper.cpp/lib/lib"
+        SWIFT_OBJC_BRIDGING_HEADER: "WhisperDictation/WhisperBridge.h"
+        OTHER_LDFLAGS: "-lwhisper -lggml -lggml-metal -lggml-blas -lggml-cpu -lggml-base -lc++"
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "WhisperDictation-Dev"
+        DEVELOPMENT_TEAM: ""
+    dependencies:
+      - sdk: AVFoundation.framework
+      - sdk: Metal.framework
+      - sdk: Accelerate.framework
+      - sdk: ServiceManagement.framework
+      - sdk: Carbon.framework
+      - sdk: Cocoa.framework
