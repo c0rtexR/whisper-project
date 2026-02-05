@@ -17,6 +17,10 @@ class AppSettings: ObservableObject {
     @AppStorage("writingStyle") var writingStyle: WritingStyle = .none
     @AppStorage("autoCheckForUpdates") var autoCheckForUpdates: Bool = true
     @AppStorage("lastUpdateCheckDate") var lastUpdateCheckDate: Double = 0
+    @AppStorage("useFastPasteMode") var useFastPasteMode: Bool = true
+    @AppStorage("selectedLanguage") var selectedLanguage: String = "en"
+    @AppStorage("customWritingPrompt") var customWritingPrompt: String = ""
+    @AppStorage("enableStreamingPreview") var enableStreamingPreview: Bool = false
     @Published var modelRefreshTrigger: Bool = false
 
     var modelsDirectory: URL {
@@ -64,6 +68,7 @@ enum WritingStyle: String, CaseIterable, Codable {
     case professional = "Professional"
     case casual = "Casual"
     case funny = "Funny"
+    case custom = "Custom"
 
     var description: String {
         switch self {
@@ -71,6 +76,7 @@ enum WritingStyle: String, CaseIterable, Codable {
         case .professional: return "Formal business language"
         case .casual: return "Conversational and friendly"
         case .funny: return "Humorous, Bender-style"
+        case .custom: return "Your own custom prompt"
         }
     }
 
@@ -80,6 +86,7 @@ enum WritingStyle: String, CaseIterable, Codable {
         case .professional: return 2
         case .casual: return 3
         case .funny: return 4
+        case .custom: return 5
         }
     }
 
@@ -88,7 +95,8 @@ enum WritingStyle: String, CaseIterable, Codable {
         case .none: return .professional
         case .professional: return .casual
         case .casual: return .funny
-        case .funny: return .none
+        case .funny: return .custom
+        case .custom: return .none
         }
     }
 }

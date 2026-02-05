@@ -15,6 +15,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     private var firstLaunchWindow: NSWindow?
     private var historyWindow: NSWindow?
     private var updateCancellable: AnyCancellable?
+    private var recordingPanel: NSPanel?
+    private var streamingTimer: Timer?
+    private var streamingState = StreamingTranscriptionState()
+    private var isStreamingInProgress = false
     private let recordingQueue = DispatchQueue(label: "com.whisperdictation.recording")
     private var _isRecording = false
     private var isRecording: Bool {
@@ -311,6 +315,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             appState.transcriptionState = .recording
 
             updateMenuBarIcon()
+            showRecordingPanel()
 
             if AppSettings.shared.playAudioFeedback {
                 print("🔔 Playing audio feedback beep")
@@ -334,6 +339,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         isRecording = false
         appState.transcriptionState = .processing
         updateMenuBarIcon()
+        dismissRecordingPanel()
 
         if AppSettings.shared.playAudioFeedback {
             print("🔔 Playing audio feedback beep")
@@ -549,7 +555,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             let window = NSWindow(contentViewController: hostingController)
             window.title = "Settings"
             window.styleMask = [.titled, .closable]
-            window.setContentSize(NSSize(width: 500, height: 400))
+            window.setContentSize(NSSize(width: 500, height: 550))
             window.center()
 
             settingsWindow = window
@@ -588,6 +594,103 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         // Use exit() instead of terminate() to avoid Metal cleanup crash
         // This is a workaround for ggml_metal_rsets_free abort issue
         exit(0)
+    }
+
+    private func showRecordingPanel() {
+        guard AppSettings.shared.showVisualFeedback else { return }
+
+        let showStreaming = AppSettings.shared.enableStreamingPreview
+
+        let panelView: AnyView
+        if showStreaming {
+            // Combined: audio level + streaming text
+            panelView = AnyView(
+                VStack(spacing: 4) {
+                    AudioLevelView(recorder: audioRecorder)
+                    StreamingTranscriptionView(state: streamingState)
+                }
+                .padding(6)
+            )
+        } else {
+            // Audio level only
+            panelView = AnyView(
+                AudioLevelView(recorder: audioRecorder)
+                    .padding(6)
+            )
+        }
+
+        let hostingController = NSHostingController(rootView: panelView)
+        let contentSize = hostingController.view.fittingSize
+
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: contentSize.width + 12, height: contentSize.height + 12),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.backgroundColor = NSColor.windowBackgroundColor
+        panel.isOpaque = false
+        panel.level = .floating
+        panel.hasShadow = true
+        panel.isMovable = false
+        panel.contentViewController = hostingController
+
+        // Position near the menu bar icon
+        if let button = statusItem.button, let buttonWindow = button.window {
+            let buttonFrame = buttonWindow.frame
+            panel.setFrameOrigin(NSPoint(
+                x: buttonFrame.midX - panel.frame.width / 2,
+                y: buttonFrame.minY - panel.frame.height - 4
+            ))
+        } else if let screen = NSScreen.main {
+            let screenFrame = screen.visibleFrame
+            panel.setFrameOrigin(NSPoint(
+                x: screenFrame.midX - panel.frame.width / 2,
+                y: screenFrame.maxY - 40
+            ))
+        }
+
+        panel.orderFront(nil)
+        recordingPanel = panel
+
+        // Start streaming timer if enabled
+        if showStreaming {
+            streamingState.text = ""
+            streamingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+                self?.performStreamingTranscription()
+            }
+        }
+    }
+
+    private func dismissRecordingPanel() {
+        streamingTimer?.invalidate()
+        streamingTimer = nil
+        isStreamingInProgress = false
+        streamingState.text = ""
+
+        recordingPanel?.close()
+        recordingPanel = nil
+    }
+
+    private func performStreamingTranscription() {
+        guard !isStreamingInProgress else { return }
+        isStreamingInProgress = true
+
+        let samples = audioRecorder.getCurrentAudioSamples()
+        guard samples.count > 8000 else { // At least 0.5s of audio
+            isStreamingInProgress = false
+            return
+        }
+
+        whisperService.transcribeChunk(samples: samples) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if case .success(let text) = result, !text.isEmpty {
+                    self.streamingState.text = text
+                }
+                self.isStreamingInProgress = false
+            }
+        }
     }
 
     private func showFirstLaunch() {

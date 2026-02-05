@@ -4,17 +4,21 @@ import ApplicationServices
 
 class TextInjector {
     static func insertText(_ text: String) {
-        // Method 1: Simulate typing via CGEvent (most reliable)
+        if AppSettings.shared.useFastPasteMode {
+            insertTextViaClipboard(text)
+        } else {
+            insertTextViaKeystrokes(text)
+        }
+    }
+
+    private static func insertTextViaKeystrokes(_ text: String) {
         DispatchQueue.main.async {
-            // Small delay to ensure focus is ready
             usleep(50000) // 50ms
 
-            // Type each character
             for char in text {
                 if let keyCode = KeyCodeMapper.keyCode(for: char) {
                     let (code, needsShift) = keyCode
 
-                    // Key down
                     if let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: true) {
                         if needsShift {
                             keyDownEvent.flags = .maskShift
@@ -22,7 +26,6 @@ class TextInjector {
                         keyDownEvent.post(tap: .cghidEventTap)
                     }
 
-                    // Key up
                     if let keyUpEvent = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: false) {
                         if needsShift {
                             keyUpEvent.flags = .maskShift
@@ -76,7 +79,7 @@ class TextInjector {
 
             // Restore clipboard after a delay
             if let previous = previousContents {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     pasteboard.clearContents()
                     pasteboard.setString(previous, forType: .string)
                 }

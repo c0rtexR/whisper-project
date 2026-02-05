@@ -16,8 +16,7 @@ class LlamaService {
                 return bundledPath
             }
         }
-        // Fallback to development path
-        return "/Users/patrykolejniczakorlowski/Development/whisper/llama.cpp/build/bin/llama-server"
+        return ""
     }
 
     func loadModel(at path: URL) throws {
@@ -136,6 +135,19 @@ class LlamaService {
                 Bender-speak:
                 """
                 stopTokens = ["\n\n", "\nNormal:"]
+            case .custom:
+                let customPrompt = AppSettings.shared.customWritingPrompt
+                if customPrompt.isEmpty {
+                    // Fall back to basic correction if no custom prompt
+                    prompt = "Correct: \(text)"
+                    stopTokens = ["\n"]
+                } else if customPrompt.contains("{text}") {
+                    prompt = customPrompt.replacingOccurrences(of: "{text}", with: text)
+                    stopTokens = ["\n\n"]
+                } else {
+                    prompt = customPrompt + "\n\n" + text
+                    stopTokens = ["\n\n"]
+                }
             }
 
             // Create request body

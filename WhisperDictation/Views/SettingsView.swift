@@ -39,7 +39,7 @@ struct SettingsView: View {
                     Label("Updates", systemImage: "arrow.down.circle")
                 }
         }
-        .frame(width: 500, height: 400)
+        .frame(width: 500, height: 550)
     }
 }
 
@@ -65,6 +65,37 @@ struct GeneralSettingsView: View {
                     .foregroundColor(.secondary)
             }
 
+            Section(header: Text("Language")) {
+                Picker("Language", selection: $settings.selectedLanguage) {
+                    Text(WhisperLanguage.autoDetect.name).tag(WhisperLanguage.autoDetect.code)
+                    Divider()
+                    ForEach(WhisperLanguage.common) { lang in
+                        Text(lang.name).tag(lang.code)
+                    }
+                    Divider()
+                    ForEach(WhisperLanguage.others) { lang in
+                        Text(lang.name).tag(lang.code)
+                    }
+                }
+
+                if settings.selectedLanguage != "en" && settings.selectedLanguage != "auto" && settings.selectedModel.hasSuffix(".en") {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("English-only models don't support other languages. Switch to a multilingual model.")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
+            Section(header: Text("Text Input")) {
+                Toggle("Fast paste mode (clipboard)", isOn: $settings.useFastPasteMode)
+                Text("Uses clipboard to paste text instantly (recommended)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
             Section(header: Text("Feedback")) {
                 Toggle("Show visual feedback when recording", isOn: $settings.showVisualFeedback)
                 Toggle("Play audio feedback (beep)", isOn: $settings.playAudioFeedback)
@@ -83,9 +114,26 @@ struct GeneralSettingsView: View {
                     Text(settings.writingStyle.description)
                         .font(.caption)
                         .foregroundColor(.secondary)
+
+                    if settings.writingStyle == .custom {
+                        TextEditor(text: $settings.customWritingPrompt)
+                            .font(.system(.body, design: .monospaced))
+                            .frame(height: 100)
+                            .border(Color.secondary.opacity(0.3))
+                        Text("Use {text} as placeholder for the transcribed text")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
 
                 Text("Download and manage models in the LLM Models tab")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section(header: Text("Experimental")) {
+                Toggle("Show live transcription preview", isOn: $settings.enableStreamingPreview)
+                Text("Shows partial transcription while recording. Uses more CPU/GPU.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -448,7 +496,7 @@ struct AboutView: View {
 
             Divider()
 
-            Link("GitHub Repository", destination: URL(string: "https://github.com/yourusername/whisper-dictation")!)
+            Link("GitHub Repository", destination: URL(string: "https://github.com/c0rtexR/whisper-project")!)
 
             Text("Built with Swift and whisper.cpp")
                 .font(.caption)
