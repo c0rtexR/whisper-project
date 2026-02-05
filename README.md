@@ -2,6 +2,8 @@
 
 System-wide voice dictation for macOS powered by OpenAI's Whisper with optional LLM-based text correction and style transformation.
 
+**[📥 Download Latest Release](https://github.com/c0rtexR/whisper-project/releases)** | **[👨‍💻 Developer Guide](docs/dev.md)** | **[🔐 Code Signing Info](SIGNING_WITH_APPLE_ID.md)**
+
 ## Features
 
 ### Core Dictation
