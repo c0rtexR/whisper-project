@@ -134,8 +134,7 @@ struct WhisperModelSettingsView: View {
                     ForEach(WhisperModel.availableModels) { model in
                         ModelManagementRow(
                             model: model,
-                            isActive: settings.selectedModel == model.id,
-                            isDownloaded: settings.isModelDownloaded(model.id),
+                            isActive: settings.selectedModel == model.id && settings.isModelDownloaded(model.id),
                             downloader: downloader
                         )
                     }
@@ -189,8 +188,7 @@ struct LLMModelSettingsView: View {
                     ForEach(LLMModel.availableModels) { model in
                         LLMModelRow(
                             model: model,
-                            isActive: settings.llmModel == model.id,
-                            isDownloaded: settings.isLLMModelDownloaded(model.id),
+                            isActive: settings.llmModel == model.id && settings.isLLMModelDownloaded(model.id),
                             downloader: downloader
                         )
                     }
@@ -216,7 +214,8 @@ struct LLMModelSettingsView: View {
 struct ModelManagementRow: View {
     let model: WhisperModel
     let isActive: Bool
-    let isDownloaded: Bool
+    @ObservedObject private var settings = AppSettings.shared
+    private var isDownloaded: Bool { settings.isModelDownloaded(model.id) }
     @ObservedObject var downloader: ModelDownloader
 
     var body: some View {
@@ -275,6 +274,14 @@ struct ModelManagementRow: View {
     private func deleteModel(_ model: WhisperModel) {
         let path = AppSettings.shared.modelPath(model.id)
         try? FileManager.default.removeItem(at: path)
+
+        // If we deleted the active model, switch to the next downloaded one
+        if AppSettings.shared.selectedModel == model.id {
+            if let nextModel = WhisperModel.availableModels.first(where: { $0.id != model.id && AppSettings.shared.isModelDownloaded($0.id) }) {
+                AppSettings.shared.selectedModel = nextModel.id
+            }
+        }
+        AppSettings.shared.modelRefreshTrigger.toggle()
     }
 }
 
@@ -354,8 +361,9 @@ struct HotkeySettingsView: View {
 struct LLMModelRow: View {
     let model: LLMModel
     let isActive: Bool
-    let isDownloaded: Bool
+    @ObservedObject private var settings = AppSettings.shared
     @ObservedObject var downloader: ModelDownloader
+    private var isDownloaded: Bool { settings.isLLMModelDownloaded(model.id) }
 
     var body: some View {
         HStack(alignment: .top) {
@@ -416,6 +424,7 @@ struct LLMModelRow: View {
     private func deleteModel(_ model: LLMModel) {
         let path = AppSettings.shared.llmModelPath(model.id)
         try? FileManager.default.removeItem(at: path)
+        AppSettings.shared.modelRefreshTrigger.toggle()
     }
 }
 

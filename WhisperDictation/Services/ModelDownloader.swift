@@ -8,6 +8,9 @@ class ModelDownloader: NSObject, ObservableObject {
     @Published var currentModel: String?
 
     private var downloadTask: URLSessionDownloadTask?
+    private var destination: URL?
+    private var completionHandler: ((Result<URL, Error>) -> Void)?
+
     private lazy var urlSession: URLSession = {
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
@@ -53,6 +56,9 @@ class ModelDownloader: NSObject, ObservableObject {
             return
         }
 
+        self.destination = destination
+        self.completionHandler = completion
+
         DispatchQueue.main.async {
             self.isDownloading = true
             self.downloadProgress = 0.0
@@ -60,45 +66,14 @@ class ModelDownloader: NSObject, ObservableObject {
             self.downloadError = nil
         }
 
-        downloadTask = urlSession.downloadTask(with: url) { [weak self] tempURL, response, error in
-            guard let self = self else { return }
-
-            DispatchQueue.main.async {
-                self.isDownloading = false
-                self.currentModel = nil
-            }
-
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.downloadError = error.localizedDescription
-                }
-                completion(.failure(error))
-                return
-            }
-
-            guard let tempURL = tempURL else {
-                let error = NSError(domain: "ModelDownloader", code: -1, userInfo: [NSLocalizedDescriptionKey: "No temporary file"])
-                completion(.failure(error))
-                return
-            }
-
-            do {
-                try? FileManager.default.removeItem(at: destination)
-                try FileManager.default.moveItem(at: tempURL, to: destination)
-                completion(.success(destination))
-            } catch {
-                DispatchQueue.main.async {
-                    self.downloadError = error.localizedDescription
-                }
-                completion(.failure(error))
-            }
-        }
-
+        downloadTask = urlSession.downloadTask(with: url)
         downloadTask?.resume()
     }
 
     func cancelDownload() {
         downloadTask?.cancel()
+        destination = nil
+        completionHandler = nil
         DispatchQueue.main.async {
             self.isDownloading = false
             self.currentModel = nil
@@ -109,14 +84,47 @@ class ModelDownloader: NSObject, ObservableObject {
 
 extension ModelDownloader: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        // Handled in completion block
+        guard let destination = destination else { return }
+        let completion = completionHandler
+
+        DispatchQueue.main.async {
+            self.isDownloading = false
+            self.currentModel = nil
+            self.destination = nil
+            self.completionHandler = nil
+        }
+
+        do {
+            try? FileManager.default.removeItem(at: destination)
+            try FileManager.default.moveItem(at: location, to: destination)
+            completion?(.success(destination))
+        } catch {
+            DispatchQueue.main.async {
+                self.downloadError = error.localizedDescription
+            }
+            completion?(.failure(error))
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        guard let error = error else { return }
+        let completion = completionHandler
+
+        DispatchQueue.main.async {
+            self.isDownloading = false
+            self.currentModel = nil
+            self.downloadError = error.localizedDescription
+            self.destination = nil
+            self.completionHandler = nil
+        }
+
+        completion?(.failure(error))
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
         DispatchQueue.main.async {
             self.downloadProgress = progress
-            print("Download progress: \(Int(progress * 100))% - \(totalBytesWritten) / \(totalBytesExpectedToWrite) bytes")
         }
     }
 }

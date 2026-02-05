@@ -17,6 +17,7 @@ class AppSettings: ObservableObject {
     @AppStorage("writingStyle") var writingStyle: WritingStyle = .none
     @AppStorage("autoCheckForUpdates") var autoCheckForUpdates: Bool = true
     @AppStorage("lastUpdateCheckDate") var lastUpdateCheckDate: Double = 0
+    @Published var modelRefreshTrigger: Bool = false
 
     var modelsDirectory: URL {
         guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {

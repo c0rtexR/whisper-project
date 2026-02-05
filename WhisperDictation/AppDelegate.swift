@@ -1,8 +1,10 @@
 import Cocoa
 import SwiftUI
 import AVFoundation
+import Combine
+import UserNotifications
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotificationCenterDelegate {
     var statusItem: NSStatusItem!
     var appState = AppState()
     var whisperService = WhisperService()
@@ -12,6 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindow: NSWindow?
     private var firstLaunchWindow: NSWindow?
     private var historyWindow: NSWindow?
+    private var updateCancellable: AnyCancellable?
     private let recordingQueue = DispatchQueue(label: "com.whisperdictation.recording")
     private var _isRecording = false
     private var isRecording: Bool {
@@ -29,10 +32,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "waveform.circle", accessibilityDescription: "Whisper Dictation")
+            button.action = #selector(statusItemClicked(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.target = self
         }
 
         updateMenuBarIcon()
-        statusItem.menu = createMenu()
 
         // Request permissions
         requestPermissions()
@@ -48,6 +53,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             startHotkeyMonitoring()
         }
 
+        // Request notification permissions
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+
+        // Watch for update downloads completing
+        updateCancellable = UpdateChecker.shared.$downloadedUpdatePath
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] path in
+                if path != nil {
+                    self?.updateMenuBarIcon()
+                    self?.sendUpdateNotification()
+                }
+            }
+
+        // Listen for settings open request from other views
+        NotificationCenter.default.addObserver(self, selector: #selector(openSettings), name: .openSettings, object: nil)
+
         // Check for updates if enabled
         if AppSettings.shared.autoCheckForUpdates {
             // Delay by 3 seconds to not slow down launch
@@ -60,6 +82,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if CommandLine.arguments.contains("--just-updated") {
             showUpdateToast()
         }
+    }
+
+    private func sendUpdateNotification() {
+        guard let update = UpdateChecker.shared.availableUpdate,
+              let version = update.version else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Update Ready"
+        content.body = "Whisper Dictation v\(version.string) is ready to install."
+        content.sound = .default
+        content.categoryIdentifier = "UPDATE"
+
+        let request = UNNotificationRequest(identifier: "update-ready", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.notification.request.content.categoryIdentifier == "UPDATE" {
+            if let path = UpdateChecker.shared.downloadedUpdatePath {
+                UpdateChecker.shared.installUpdate(zipPath: path)
+            }
+        }
+        completionHandler()
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
     }
 
     private func showUpdateToast() {
@@ -402,28 +451,47 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        statusItem.menu = createMenu()
+    }
+
+    @objc func statusItemClicked(_ sender: NSStatusBarButton) {
+        guard let event = NSApp.currentEvent else { return }
+
+        if event.type == .rightMouseUp {
+            // Right click: show menu
+            let menu = createMenu()
+            statusItem.menu = menu
+            statusItem.button?.performClick(nil)
+            // Clear menu after so left click isn't intercepted next time
+            DispatchQueue.main.async {
+                self.statusItem.menu = nil
+            }
+        } else {
+            // Left click: open history
+            openHistory()
+        }
     }
 
     private func createMenu() -> NSMenu {
         let menu = NSMenu()
 
-        // Status
-        let statusItem = NSMenuItem(title: appState.transcriptionState.displayText, action: nil, keyEquivalent: "")
-        statusItem.isEnabled = false
-        menu.addItem(statusItem)
-
-        menu.addItem(NSMenuItem.separator())
-
-        // Model info
-        let modelItem = NSMenuItem(title: "Model: \(AppSettings.shared.selectedModel)", action: nil, keyEquivalent: "")
-        modelItem.isEnabled = false
-        menu.addItem(modelItem)
-
-        // Add writing style info when LLM is enabled
+        // Writing style submenu when LLM is enabled
         if AppSettings.shared.useLLMCorrection {
+            let styleMenu = NSMenu()
+            for style in WritingStyle.allCases {
+                let item = NSMenuItem(title: style.rawValue, action: #selector(selectStyle(_:)), keyEquivalent: "")
+                item.representedObject = style
+                if style == AppSettings.shared.writingStyle {
+                    item.state = .on
+                }
+                styleMenu.addItem(item)
+            }
+            styleMenu.addItem(NSMenuItem.separator())
+            let cycleItem = NSMenuItem(title: "Cycle Style", action: #selector(cycleStyle), keyEquivalent: "s")
+            cycleItem.keyEquivalentModifierMask = [.command, .shift]
+            styleMenu.addItem(cycleItem)
+
             let styleItem = NSMenuItem(title: "Style: \(AppSettings.shared.writingStyle.rawValue)", action: nil, keyEquivalent: "")
-            styleItem.isEnabled = false
+            styleItem.submenu = styleMenu
             menu.addItem(styleItem)
         }
 
@@ -438,9 +506,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
         menu.addItem(settingsItem)
 
-        // Check for Updates
-        let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
-        menu.addItem(updateItem)
+        // Update & Restart (only show when update is downloaded)
+        if let update = UpdateChecker.shared.availableUpdate,
+           let version = update.version,
+           UpdateChecker.shared.downloadedUpdatePath != nil {
+            let updateItem = NSMenuItem(title: "Update & Restart (v\(version.string))", action: #selector(installUpdate), keyEquivalent: "")
+            menu.addItem(updateItem)
+        }
 
         menu.addItem(NSMenuItem.separator())
 
@@ -491,8 +563,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         openSettings()
     }
 
-    @objc func checkForUpdates() {
-        UpdateChecker.shared.checkForUpdates(silent: false)
+    @objc func selectStyle(_ sender: NSMenuItem) {
+        if let style = sender.representedObject as? WritingStyle {
+            AppSettings.shared.writingStyle = style
+            updateMenuBarIcon()
+        }
+    }
+
+    @objc func cycleStyle() {
+        AppSettings.shared.writingStyle = AppSettings.shared.writingStyle.next()
+        updateMenuBarIcon()
+    }
+
+    @objc func installUpdate() {
+        if let path = UpdateChecker.shared.downloadedUpdatePath {
+            UpdateChecker.shared.installUpdate(zipPath: path)
+        }
     }
 
     @objc func quit() {

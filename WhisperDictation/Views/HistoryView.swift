@@ -1,5 +1,9 @@
 import SwiftUI
 
+extension Notification.Name {
+    static let openSettings = Notification.Name("openSettings")
+}
+
 struct HistoryView: View {
     @ObservedObject var history = TranscriptionHistory.shared
 
@@ -14,6 +18,12 @@ struct HistoryView: View {
                     history.clearHistory()
                 }
                 .disabled(history.items.isEmpty)
+                Button(action: {
+                    NotificationCenter.default.post(name: .openSettings, object: nil)
+                }) {
+                    Image(systemName: "gearshape")
+                }
+                .buttonStyle(.bordered)
             }
             .padding()
 
