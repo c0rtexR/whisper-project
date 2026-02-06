@@ -1,201 +1,91 @@
 # Whisper Dictation
 
-System-wide voice dictation for macOS powered by OpenAI's Whisper with optional LLM-based text correction and style transformation.
+System-wide voice dictation for macOS. Press a hotkey, speak, text appears at your cursor. Powered by OpenAI Whisper running locally via whisper.cpp.
 
-**[📥 Download Latest Release](https://github.com/c0rtexR/whisper-project/releases)** | **[👨‍💻 Developer Guide](docs/dev.md)** | **[🔐 Code Signing Info](SIGNING_WITH_APPLE_ID.md)**
+**[Download Latest Release](https://github.com/c0rtexR/whisper-project/releases)** · [Developer Guide](docs/dev.md)
 
 ## Features
 
-### Core Dictation
-- **System-wide hotkey** (default: CapsLock) for voice dictation anywhere
-- **Toggle or Hold-to-Record** modes
-- **Fast local transcription** using Whisper models (tiny to large-v3)
-- **GPU acceleration** via Metal for Apple Silicon Macs
-- **Transcription history** (Cmd+Shift+H) with both Whisper and LLM versions
+- Global hotkey (default CapsLock), toggle or hold-to-record
+- Fast paste mode: uses clipboard instead of keystroke simulation
+- 99 languages + auto-detect
+- Optional LLM text correction via local llama.cpp server
+- 5 writing styles: None, Professional, Casual, Funny, Custom
+- Audio level indicator while recording
+- Live transcription preview while recording (experimental)
+- Transcription history (Cmd+Shift+H)
+- Auto-updates with background downloads
+- Metal GPU acceleration on Apple Silicon
 
-### Writing Styles (NEW!) ✨
-Transform your transcriptions with 4 different writing styles:
+## Requirements
 
-1. **None (Badge: 1)** - Basic error correction only
-2. **Professional (Badge: 2)** - Formal business language
-3. **Casual (Badge: 3)** - Conversational and friendly tone
-4. **Funny (Badge: 4)** - Humorous, Bender-from-Futurama style
+- macOS 13.0+
+- Apple Silicon or Intel Mac
+- ~2 GB disk for Whisper model, +5 GB if using LLM correction
 
-**Features:**
-- Menu bar badge shows current style number (1-4)
-- Settings UI picker (conditional on LLM enabled)
-- **Cmd+Shift+S** hotkey to quickly cycle through styles
-- Status menu displays current style name
+## Install
 
-**Requirements:**
-- Works best with **Qwen2.5 7B** model (4.7 GB)
-- Requires 8GB+ RAM for optimal performance
-- Smaller models (0.5B-3B) may struggle with style consistency
-
-## Installation
-
-### Requirements
-- macOS 13.0 or later
-- Apple Silicon Mac (M1/M2/M3) or Intel Mac
-- ~2GB disk space for Whisper models
-- Additional 5-10GB for LLM models (optional)
-
-### Download & Install
-1. Download the latest `WhisperDictation-v1.0.zip` from [Releases](../../releases)
-2. Unzip and move `WhisperDictation.app` to `/Applications/`
-3. **Important**: Right-click the app and select "Open" (first launch only)
-   - You'll see an "unidentified developer" warning
-   - Click "Open" to confirm
-   - This is because the app is not notarized (no $99/year Apple Developer account)
-   - After the first launch, you can open it normally
-4. Grant **Microphone** and **Accessibility** permissions when prompted
-
-### First Launch Setup
-1. Download a Whisper model (recommended: `large-v3` for best quality)
-2. (Optional) Enable LLM correction and download an LLM model
-   - For **Writing Styles**: Download **Qwen2.5 7B** or larger
-3. Configure your hotkey (default: CapsLock)
-4. Choose recording mode (Toggle or Hold-to-Record)
+1. Download `WhisperDictation-v0.3.0.zip` from [Releases](../../releases)
+2. Unzip, move `WhisperDictation.app` to Applications
+3. Right-click the app, select "Open" on first launch (required to bypass Gatekeeper since the app is self-signed)
+4. Grant permissions when prompted:
+   - **Microphone**: needed to record audio
+   - **Accessibility**: needed to type text into other apps
+5. Download a Whisper model in the setup screen (recommended: large-v3)
 
 ## Usage
 
-### Basic Dictation
-1. Press your hotkey to start recording
-2. Speak naturally
-3. Press hotkey again to stop (Toggle mode) or release key (Hold mode)
-4. Text is automatically typed at cursor position
+| Shortcut | Action |
+|---|---|
+| CapsLock | Start/stop recording |
+| Cmd+Shift+S | Cycle writing style |
+| Cmd+Shift+H | Transcription history |
 
-### Writing Styles
-1. **Enable LLM correction** in Settings → General
-2. **Download Qwen2.5 7B** in Settings → LLM Models tab
-3. **Select a style** in Settings → General → Writing style picker
-4. **Quick cycle**: Press **Cmd+Shift+S** to cycle through styles
-5. **Visual feedback**: Menu bar badge shows current style number
+Right-click the menu bar icon for settings and style selection.
 
-### Keyboard Shortcuts
-- **CapsLock** (default): Start/stop recording
-- **Cmd+Shift+H**: Open transcription history
-- **Cmd+Shift+S**: Cycle writing styles
+### LLM Correction & Writing Styles
 
-## Building from Source
+1. Enable "Use LLM to correct transcriptions" in Settings > General
+2. Download an LLM model in Settings > LLM Models (Qwen2.5 7B recommended for styles)
+3. Pick a style from the dropdown, or select Custom and write your own prompt using `{text}` as placeholder
 
-### Prerequisites
+The LLM server starts automatically when enabled.
+
+## Models
+
+**Whisper** (speech-to-text), downloaded in-app:
+
+| Model | Size | Quality |
+|---|---|---|
+| tiny | 75 MB | Low |
+| base | 142 MB | Fair |
+| small | 466 MB | Good |
+| medium | 1.5 GB | Better |
+| large-v3 | 3.1 GB | Best |
+
+**LLM** (text correction + styles), optional:
+
+| Model | Size | Notes |
+|---|---|---|
+| Qwen2.5 0.5B | 350 MB | Basic correction only |
+| Qwen2.5 7B | 4.7 GB | Recommended for writing styles |
+
+## Build from Source
+
 ```bash
-# Install Xcode Command Line Tools
-xcode-select --install
-
-# Clone llama.cpp and build
-git clone https://github.com/ggerganov/llama.cpp.git
-cd llama.cpp
-mkdir build && cd build
-cmake .. -DGGML_METAL=ON
-make -j
+xcodebuild -project WhisperDictation.xcodeproj -scheme WhisperDictation -configuration Release
 ```
 
-### Build Steps
-```bash
-# Generate Xcode project
-xcodegen generate
+Requires whisper.cpp static libraries in `whisper.cpp/lib/`. See [Developer Guide](docs/dev.md).
 
-# Build
-xcodebuild -project WhisperDictation.xcodeproj -scheme WhisperDictation -configuration Release build
+## Privacy
 
-# Install
-cp -R build/Release/WhisperDictation.app /Applications/
-```
-
-## Model Downloads
-
-### Whisper Models
-Downloaded automatically through the app UI:
-- `tiny` (75 MB) - Fastest, lowest quality
-- `base` (142 MB) - Fast, decent quality
-- `small` (466 MB) - Good balance
-- `medium` (1.5 GB) - Better quality
-- `large-v3` (3.1 GB) - Best quality (recommended)
-
-### LLM Models (for Writing Styles)
-Downloaded through the app UI:
-- `Qwen2.5 0.5B` (350 MB) - Basic corrections only, struggles with styles
-- `Qwen2.5 1.5B` (950 MB) - Fast but inconsistent with styles
-- `Qwen2.5 3B` (1.9 GB) - Better but still inconsistent
-- **`Qwen2.5 7B` (4.7 GB)** - **Recommended for Writing Styles** ⭐
-- `Llama 3.2 3B` (1.9 GB) - Alternative, good quality
-
-## Troubleshooting
-
-### Recording doesn't start
-- Check **Accessibility** permission in System Settings → Privacy & Security
-- Try a different hotkey in Settings → Hotkey tab
-
-### No text appears after recording
-- Check **Microphone** permission
-- Verify model is downloaded in Settings → Whisper Models
-
-### LLM correction not working
-- Ensure LLM model is downloaded
-- Check that "Use LLM to correct transcriptions" is enabled
-- Wait a few seconds for model to load on first use
-
-### Writing styles produce strange results
-- Make sure you're using **Qwen2.5 7B** or larger
-- Smaller models may answer questions instead of rephrasing
-- Restart the app if LLM server becomes unresponsive
-
-## Technical Details
-
-### Architecture
-- **Whisper**: C++ (whisper.cpp) for speech recognition
-- **LLM**: llama.cpp server for text correction and style transfer
-- **Swift/SwiftUI**: Native macOS UI
-- **Metal**: GPU acceleration on Apple Silicon
-
-### Writing Styles Implementation
-- **Translation-style prompts**: Frames style changes as "translation" tasks
-- **Few-shot learning**: Provides examples to guide the LLM
-- **Dynamic token limits**: Scales from 64-512 tokens based on input length
-- **Repetition penalty**: Prevents LLM loops (1.1-1.15)
-- **Temperature**: 0.1 for corrections, 0.3-0.5 for creative styles
+All speech processing runs on your Mac. Network is only used for model downloads and update checks against the GitHub releases API.
 
 ## Credits
 
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - Whisper model inference
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) - LLM inference
-- [OpenAI Whisper](https://github.com/openai/whisper) - Original Whisper model
-- [Qwen Team](https://github.com/QwenLM/Qwen) - Qwen language models
+[whisper.cpp](https://github.com/ggerganov/whisper.cpp) · [llama.cpp](https://github.com/ggerganov/llama.cpp) · [OpenAI Whisper](https://github.com/openai/whisper) · [Qwen](https://github.com/QwenLM/Qwen)
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Security & Privacy
-
-### Code Signing
-This app is **self-signed** (not notarized by Apple). This means:
-- ❌ You'll see an "unidentified developer" warning on first launch
-- ✅ The code is **100% open source** - you can inspect every line
-- ✅ All processing happens **locally on your Mac**
-- ✅ No data is sent to external servers
-- ✅ You can build from source to verify
-
-### Why Not Notarized?
-Apple notarization requires a $99/year Developer ID. For an open-source project, we prioritize:
-1. **Transparency**: Full source code available
-2. **Privacy**: Everything runs locally
-3. **Community**: Anyone can contribute and verify
-
-If you're concerned, you can:
-- Build from source (see "Building from Source" section)
-- Inspect the code before installing
-- Check file hashes in GitHub releases
-
-### Alternative Installation (Advanced)
-If you prefer, you can bypass Gatekeeper entirely:
-```bash
-# Remove quarantine attribute
-xattr -d com.apple.quarantine /Applications/WhisperDictation.app
-
-# Or disable Gatekeeper temporarily (not recommended)
-sudo spctl --master-disable
-```
-
+All Rights Reserved. See [LICENSE](LICENSE).
