@@ -16,6 +16,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
     private var historyWindow: NSWindow?
     private var updateCancellable: AnyCancellable?
     private var recordingPanel: NSPanel?
+    private var floatingButtonPanel: NSPanel?
+    private var floatingButtonHosting: NSHostingController<FloatingRecordButton>?
     private var streamingTimer: Timer?
     private var streamingState = StreamingTranscriptionState()
     private var isStreamingInProgress = false
@@ -85,6 +87,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         // Show toast if app was just updated
         if CommandLine.arguments.contains("--just-updated") {
             showUpdateToast()
+        }
+
+        // Show floating record button if enabled
+        if AppSettings.shared.showFloatingButton {
+            showFloatingButtonPanel()
         }
     }
 
@@ -457,6 +464,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
             }
         }
 
+        updateFloatingButton()
     }
 
     @objc func statusItemClicked(_ sender: NSStatusBarButton) {
@@ -507,6 +515,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         let historyItem = NSMenuItem(title: "History...", action: #selector(openHistory), keyEquivalent: "h")
         historyItem.keyEquivalentModifierMask = [.command, .shift]
         menu.addItem(historyItem)
+
+        // Floating record button toggle
+        let floatingItem = NSMenuItem(title: "Show Record Button", action: #selector(toggleFloatingButton), keyEquivalent: "")
+        floatingItem.state = AppSettings.shared.showFloatingButton ? .on : .off
+        menu.addItem(floatingItem)
+
+        menu.addItem(NSMenuItem.separator())
 
         // Settings
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
@@ -581,6 +596,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         updateMenuBarIcon()
     }
 
+    @objc func toggleFloatingButton() {
+        AppSettings.shared.showFloatingButton.toggle()
+        if AppSettings.shared.showFloatingButton {
+            showFloatingButtonPanel()
+        } else {
+            hideFloatingButtonPanel()
+        }
+    }
+
     @objc func installUpdate() {
         if let path = UpdateChecker.shared.downloadedUpdatePath {
             UpdateChecker.shared.installUpdate(zipPath: path)
@@ -594,6 +618,56 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotifi
         // Use exit() instead of terminate() to avoid Metal cleanup crash
         // This is a workaround for ggml_metal_rsets_free abort issue
         exit(0)
+    }
+
+    private func showFloatingButtonPanel() {
+        guard floatingButtonPanel == nil else { return }
+
+        let hostingController = NSHostingController(
+            rootView: FloatingRecordButton(
+                transcriptionState: appState.transcriptionState,
+                onTap: { [weak self] in self?.toggleRecording() }
+            )
+        )
+        floatingButtonHosting = hostingController
+
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 56, height: 56),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.level = .floating
+        panel.hasShadow = false
+        panel.isMovableByWindowBackground = true
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary]
+        panel.contentViewController = hostingController
+
+        if let screen = NSScreen.main {
+            let screenFrame = screen.visibleFrame
+            panel.setFrameOrigin(NSPoint(
+                x: screenFrame.maxX - 76,
+                y: screenFrame.minY + 80
+            ))
+        }
+
+        panel.orderFront(nil)
+        floatingButtonPanel = panel
+    }
+
+    private func hideFloatingButtonPanel() {
+        floatingButtonPanel?.close()
+        floatingButtonPanel = nil
+        floatingButtonHosting = nil
+    }
+
+    private func updateFloatingButton() {
+        floatingButtonHosting?.rootView = FloatingRecordButton(
+            transcriptionState: appState.transcriptionState,
+            onTap: { [weak self] in self?.toggleRecording() }
+        )
     }
 
     private func showRecordingPanel() {

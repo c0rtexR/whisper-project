@@ -21,6 +21,7 @@ class AppSettings: ObservableObject {
     @AppStorage("selectedLanguage") var selectedLanguage: String = "en"
     @AppStorage("customWritingPrompt") var customWritingPrompt: String = ""
     @AppStorage("enableStreamingPreview") var enableStreamingPreview: Bool = false
+    @AppStorage("showFloatingButton") var showFloatingButton: Bool = false
     @Published var modelRefreshTrigger: Bool = false
 
     var modelsDirectory: URL {

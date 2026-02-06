@@ -41,6 +41,7 @@
 		B3C4D5E6F7A8B9C0D1E2F3A4 /* WhisperLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B3 /* WhisperLanguage.swift */; };
 		D4E5F6A7B8C9D0E1F2A3B4C5 /* AudioLevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6A7B8C9D0E1F2A3B4C5D6 /* AudioLevelView.swift */; };
 		F6A7B8C9D0E1F2A3B4C5D6E7 /* StreamingTranscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B8C9D0E1F2A3B4C5D6E7F8 /* StreamingTranscriptionView.swift */; };
+		C9D0E1F2A3B4C5D6E7F8A9B0 /* FloatingRecordButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C9D0E1F2A3B4C5D6E7F8A9 /* FloatingRecordButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -81,6 +82,7 @@
 		C2D3E4F5A6B7C8D9E0F1A2B3 /* WhisperLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperLanguage.swift; sourceTree = "<group>"; };
 		E5F6A7B8C9D0E1F2A3B4C5D6 /* AudioLevelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLevelView.swift; sourceTree = "<group>"; };
 		A7B8C9D0E1F2A3B4C5D6E7F8 /* StreamingTranscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingTranscriptionView.swift; sourceTree = "<group>"; };
+		B8C9D0E1F2A3B4C5D6E7F8A9 /* FloatingRecordButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingRecordButton.swift; sourceTree = "<group>"; };
 		E62A1A3AC4D85975F3F410CA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F68716E33479CCCA6BF80B4E /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		F9D599D23669A77745F55166 /* WhisperBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WhisperBridge.h; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 			children = (
 				E5F6A7B8C9D0E1F2A3B4C5D6 /* AudioLevelView.swift */,
 				BF03062F7B57E45D191E367F /* FirstLaunchView.swift */,
+				B8C9D0E1F2A3B4C5D6E7F8A9 /* FloatingRecordButton.swift */,
 				1478BD72FAC1B59B3868B52C /* HistoryView.swift */,
 				E62A1A3AC4D85975F3F410CA /* SettingsView.swift */,
 				A7B8C9D0E1F2A3B4C5D6E7F8 /* StreamingTranscriptionView.swift */,
@@ -299,7 +302,7 @@
 				2863D0A89C2EE1CBAE0445AE /* GitHubRelease.swift in Sources */,
 				2A7966FE84EE99F9AA34743F /* UpdateChecker.swift in Sources */,
 				E57C2CB169C19092C4829652 /* UpdatePromptView.swift in Sources */,
-
+				C9D0E1F2A3B4C5D6E7F8A9B0 /* FloatingRecordButton.swift in Sources */,
 
 			);
 			runOnlyForDeploymentPostprocessing = 0;
